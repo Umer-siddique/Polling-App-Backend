@@ -19,7 +19,7 @@ exports.authProtect = AsyncHandler(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError("You are not logged in! Please log in to get access.", 401)
+      new AppError("Unauthorized! Please log in to get access.", 401)
     );
   }
 
