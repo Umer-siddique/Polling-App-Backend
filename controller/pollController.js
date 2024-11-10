@@ -1,3 +1,4 @@
+const axios = require("axios");
 const AsyncHandler = require("../utils/AsyncHandler");
 const AppError = require("../utils/AppError");
 const Poll = require("../schemas/pollSchema");
@@ -5,6 +6,9 @@ const Poll = require("../schemas/pollSchema");
 exports.createPoll = AsyncHandler(async (req, res, next) => {
   const { title, options } = req.body;
   const user = req.user.id;
+  const _options = Array.isArray(options)
+    ? req.body.options
+    : req.body.options.split(",");
 
   // Ensure image is available
   if (!req.file) {
@@ -29,7 +33,7 @@ exports.createPoll = AsyncHandler(async (req, res, next) => {
   const newPoll = await Poll.create({
     title,
     imageUrl: optimizedImageUrl,
-    options,
+    options: _options,
     createdBy: user,
   });
 

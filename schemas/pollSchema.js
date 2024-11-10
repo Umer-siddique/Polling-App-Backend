@@ -21,7 +21,8 @@ const pollSchema = new Schema(
       ],
       validate: {
         validator: function (v) {
-          return v.length >= 2 && v.length <= 5; // At least 2 and at most 5 options
+          console.log("Options being validated:", v); // Debug statement
+          return v.length >= 2 && v.length <= 5;
         },
         message: "A poll must have between 2 and 5 options.",
       },

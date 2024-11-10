@@ -13,6 +13,7 @@ const { logger } = require("./middleware/logger");
 const ErrorHandler = require("./middleware/ErrorHandler");
 const AppError = require("./utils/AppError");
 const routes = require("./routes");
+const swaggerDocs = require("./config/swagger");
 
 // Start express app
 const app = express();
@@ -32,7 +33,13 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 // Cors Middleware
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,POST,PUT,HEAD,PATCH,DELETE",
+    credentails: true, //It Handles the Headers
+  })
+);
 
 // Express Body Parser
 app.use(express.json({ limit: "100kb" }));
@@ -58,6 +65,9 @@ app.use(compression());
 
 // For Serving Static files
 app.use("/", express.static(path.join(__dirname, "public")));
+
+// Initialize Swagger
+swaggerDocs(app, 8000);
 
 // Our First Root Route
 app.use("/", require("./routes/root"));
