@@ -12,7 +12,7 @@ const corsOptions = require("./config/corsOptions");
 const { logger } = require("./middleware/logger");
 const ErrorHandler = require("./middleware/ErrorHandler");
 const AppError = require("./utils/AppError");
-const routes = require("./routes/index");
+const routes = require("./routes");
 
 // Start express app
 const app = express();
