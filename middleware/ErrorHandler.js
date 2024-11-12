@@ -12,7 +12,7 @@ const handleJwtTokenError = () => {
 };
 
 const handleCastErrorDB = (error) => {
-  const message = `Invalid ${error.path} ${error.value._id}.`;
+  const message = `Invalid ${error.path} ${error.value}.`;
   return new AppError(message, 400);
 };
 

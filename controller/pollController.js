@@ -3,12 +3,13 @@ const AsyncHandler = require("../utils/AsyncHandler");
 const AppError = require("../utils/AppError");
 const Poll = require("../schemas/pollSchema");
 
+const validateArray = (options) =>
+  Array.isArray(options) ? options : options.split(",");
+
 exports.createPoll = AsyncHandler(async (req, res, next) => {
-  const { title, options } = req.body;
+  const { title } = req.body;
   const user = req.user.id;
-  const _options = Array.isArray(options)
-    ? req.body.options
-    : req.body.options.split(",");
+  const options = validateArray(req.body.options);
 
   // Ensure image is available
   if (!req.file) {
@@ -33,16 +34,59 @@ exports.createPoll = AsyncHandler(async (req, res, next) => {
   const newPoll = await Poll.create({
     title,
     imageUrl: optimizedImageUrl,
-    options: _options,
+    options,
     createdBy: user,
+    originalImageSize: imageSizeBefore,
+    optimizedImageSize: imageSizeAfter,
   });
 
   res.status(201).json({
-    poll: newPoll,
-    imageSize: { before: imageSizeBefore, after: imageSizeAfter },
+    status: "success",
+    data: {
+      poll: newPoll,
+    },
   });
 });
-exports.fetchAllPolls = AsyncHandler(async (req, res, next) => {});
-exports.fetchPoll = AsyncHandler(async (req, res, next) => {});
-exports.updatePoll = AsyncHandler(async (req, res, next) => {});
-exports.deletePoll = AsyncHandler(async (req, res, next) => {});
+
+exports.fetchAllPolls = AsyncHandler(async (req, res, next) => {
+  const polls = await Poll.find();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      polls,
+    },
+  });
+});
+
+exports.fetchPoll = AsyncHandler(async (req, res, next) => {
+  // If found, `req.document` contains the document
+  res.status(200).json({
+    status: "success",
+    data: {
+      poll: req.document,
+    },
+  });
+});
+
+exports.updatePoll = AsyncHandler(async (req, res, next) => {
+  // Find and update document
+  const options = validateArray(req.body.options);
+  const updatedPoll = await Poll.findByIdAndUpdate(
+    req.params.id,
+    { ...req.body, options },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  res.status(200).json({ status: "success", data: { poll: updatedPoll } });
+});
+
+exports.deletePoll = AsyncHandler(async (req, res, next) => {
+  // Find and delete document
+  await Poll.findByIdAndDelete(req.params.id);
+  res
+    .status(200)
+    .json({ status: "sucess", message: "Poll deleted successfully" });
+});

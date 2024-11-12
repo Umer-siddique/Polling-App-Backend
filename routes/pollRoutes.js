@@ -3,6 +3,8 @@ const express = require("express");
 const pollController = require("../controller/pollController");
 const { authProtect } = require("../middleware/authProtect");
 const multer = require("multer");
+const Poll = require("../schemas/pollSchema");
+const ValidateResourceExist = require("../middleware/ValidateResource");
 
 const router = express.Router();
 
@@ -15,6 +17,53 @@ const upload = multer({ storage: storage }); // The image will be available in r
  * tags:
  *   name: Polls
  *   description: API to manage polls.
+ */
+
+/**
+ * @swagger
+ * /polls:
+ *   get:
+ *     summary: Retrieve a list of all polls
+ *     description: Fetches all polls in the database.
+ *     tags: [Polls]
+ *     responses:
+ *       200:
+ *         description: A list of polls
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: Poll ID
+ *                   title:
+ *                     type: string
+ *                     description: Title of the poll
+ *                   imageUrl:
+ *                     type: string
+ *                     description: URL of the poll image
+ *                   originalImageSize:
+ *                     type: string
+ *                     description: Image size before optimization
+ *                   optimizedImageSize:
+ *                     type: string
+ *                     description: Image size after optimization
+ *                   options:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                     description: Array of poll options
+ *                   votes:
+ *                     type: array
+ *                     items:
+ *                       type: number
+ *                     description: Array of votes for each option
+ *                   createdBy:
+ *                     type: string
+ *                     description: ID of the user who created the poll
  */
 
 /**
@@ -120,8 +169,8 @@ router
  */
 router
   .route("/:id")
-  .get(pollController.fetchPoll)
-  .patch(pollController.updatePoll)
-  .delete(pollController.deletePoll);
+  .get(ValidateResourceExist(Poll), pollController.fetchPoll)
+  .patch(ValidateResourceExist(Poll), authProtect, pollController.updatePoll)
+  .delete(ValidateResourceExist(Poll), authProtect, pollController.deletePoll);
 
 module.exports = router;
