@@ -2,9 +2,8 @@ const axios = require("axios");
 const AsyncHandler = require("../utils/AsyncHandler");
 const AppError = require("../utils/AppError");
 const Poll = require("../schemas/pollSchema");
-
-const validateArray = (options) =>
-  Array.isArray(options) ? options : options.split(",");
+const validateArray = require("../utils/helpers");
+const { io } = require("../app");
 
 exports.createPoll = AsyncHandler(async (req, res, next) => {
   const { title } = req.body;
@@ -89,4 +88,40 @@ exports.deletePoll = AsyncHandler(async (req, res, next) => {
   res
     .status(200)
     .json({ status: "sucess", message: "Poll deleted successfully" });
+});
+
+exports.voteOnPolls = AsyncHandler(async (req, res, next) => {
+  const pollId = req.params.id;
+  const { optionIndex } = req.body; // The index of the option being voted for
+
+  // Validate the option index type
+  if (typeof optionIndex !== "number") {
+    return next(new AppError("Invalid option index.", 400));
+  }
+
+  const poll = await Poll.findById(pollId);
+
+  if (!poll) {
+    return next(new AppError("Poll not found!", 404));
+  }
+
+  // Validate the option index
+  if (optionIndex < 0 || optionIndex >= poll.options.length) {
+    return res.status(400).json({ error: "Option index out of bounds." });
+  }
+
+  // Increment the vote count for the selected option
+  poll.votes[optionIndex] += 1;
+
+  // Only update the votes field in the database
+  await Poll.updateOne({ _id: pollId }, { votes: poll.votes });
+
+  // io.emit("pollUpdated", poll);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      poll,
+    },
+  });
 });

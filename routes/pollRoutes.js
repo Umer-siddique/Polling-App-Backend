@@ -100,6 +100,70 @@ const upload = multer({ storage: storage }); // The image will be available in r
  *       400:
  *         description: Bad request
  */
+
+/**
+ * @swagger
+ * /polls/{id}/vote:
+ *   patch:
+ *     summary: Vote on a specific option in a poll
+ *     description: Increments the vote count for a specified option in a poll.
+ *     tags: [Polls]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the poll
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               optionIndex:
+ *                 type: number
+ *                 description: The index of the option being voted for
+ *             required:
+ *               - optionIndex
+ *     responses:
+ *       200:
+ *         description: Vote counted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   description: Success status
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     poll:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           description: Poll ID
+ *                         title:
+ *                           type: string
+ *                           description: Title of the poll
+ *                         votes:
+ *                           type: array
+ *                           items:
+ *                             type: number
+ *                           description: Array of votes for each option
+ *       400:
+ *         description: Invalid option index or option index out of bounds
+ *       404:
+ *         description: Poll not found
+ */
+
+// Vote on a Poll route
+router.patch("/:id/vote", pollController.voteOnPolls);
+
 router
   .route("/")
   .post(authProtect, upload.single("image"), pollController.createPoll) // Ensure authProtect runs first

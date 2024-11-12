@@ -1,4 +1,5 @@
 const express = require("express");
+const http = require("http");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
@@ -8,15 +9,19 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const compression = require("compression");
 const cors = require("cors");
-const corsOptions = require("./config/corsOptions");
+// const corsOptions = require("./config/corsOptions");
 const { logger } = require("./middleware/logger");
 const ErrorHandler = require("./middleware/ErrorHandler");
 const AppError = require("./utils/AppError");
 const routes = require("./routes");
 const swaggerDocs = require("./config/swagger");
+const socketIo = require("socket.io");
 
 // Start express app
 const app = express();
+// Create an HTTP Server
+const server = http.createServer(app);
+const io = socketIo(server);
 
 // Set security HTTP headers
 app.use(helmet());
@@ -44,6 +49,15 @@ app.use(
 // Express Body Parser
 app.use(express.json({ limit: "100kb" }));
 app.use(express.urlencoded({ extended: true, limit: "100kb" }));
+
+// Real-time voting namespace for Socket.IO
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
 
 // Handling Cookie
 app.use(cookieParser());
@@ -91,4 +105,4 @@ app.all("*", (req, res, next) => {
 // Global Error Handler Middleware
 app.use(ErrorHandler);
 
-module.exports = app;
+module.exports = { app, io, server };
