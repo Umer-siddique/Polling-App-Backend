@@ -4,6 +4,7 @@ const AppError = require("../utils/AppError");
 const Poll = require("../schemas/pollSchema");
 const validateArray = require("../utils/helpers");
 const { io } = require("../app");
+const getImageData = require("../utils/helpers");
 
 exports.createPoll = AsyncHandler(async (req, res, next) => {
   const { title } = req.body;
@@ -32,9 +33,9 @@ exports.createPoll = AsyncHandler(async (req, res, next) => {
 
   const newPoll = await Poll.create({
     title,
-    imageUrl: optimizedImageUrl,
     options,
     createdBy: user,
+    imageUrl: optimizedImageUrl,
     originalImageSize: imageSizeBefore,
     optimizedImageSize: imageSizeAfter,
   });
@@ -48,7 +49,11 @@ exports.createPoll = AsyncHandler(async (req, res, next) => {
 });
 
 exports.fetchAllPolls = AsyncHandler(async (req, res, next) => {
-  const polls = await Poll.find();
+  const polls = await Poll.find().sort({ createdAt: -1 });
+
+  if (!polls) {
+    return next(new AppError("No Polls exist please create some!", 400));
+  }
 
   res.status(200).json({
     status: "success",
@@ -70,15 +75,10 @@ exports.fetchPoll = AsyncHandler(async (req, res, next) => {
 
 exports.updatePoll = AsyncHandler(async (req, res, next) => {
   // Find and update document
-  const options = validateArray(req.body.options);
-  const updatedPoll = await Poll.findByIdAndUpdate(
-    req.params.id,
-    { ...req.body, options },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  // const options = validateArray(req.body.options);
+  console.log("options", req.body.options);
+
+  const updatedPoll = await Poll.updateOne({ _id: req.params.id }, req.body);
   res.status(200).json({ status: "success", data: { poll: updatedPoll } });
 });
 
@@ -93,6 +93,9 @@ exports.deletePoll = AsyncHandler(async (req, res, next) => {
 exports.voteOnPolls = AsyncHandler(async (req, res, next) => {
   const pollId = req.params.id;
   const { optionIndex } = req.body; // The index of the option being voted for
+
+  console.log("Typechecking", typeof optionIndex);
+  console.log("optionindex", optionIndex);
 
   // Validate the option index type
   if (typeof optionIndex !== "number") {

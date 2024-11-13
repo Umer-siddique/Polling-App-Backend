@@ -40,7 +40,7 @@ app.use("/api", limiter);
 // Cors Middleware
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:5173",
     methods: "GET,POST,PUT,HEAD,PATCH,DELETE",
     credentails: true, //It Handles the Headers
   })
