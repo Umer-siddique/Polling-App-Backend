@@ -131,12 +131,21 @@ Create a `.env` file in the root directory with the following variables:
 - `NODE_ENV`: Set to `development` or `production`.
 
 Example:
+Create a config.env file on root
 
-```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/polling-app
-JWT_SECRET=your_jwt_secret
+```config.env
 NODE_ENV=development
+PORT=8000
+
+MONGO_URI=mongodb+srv://developers:OFp1ps78oLztRuWe@cluster0.t54clke.mongodb.net/PollingApp?retryWrites=true
+LOCAL_MONGO_URI=mongodb+srv://developers:OFp1ps78oLztRuWe@cluster0.t54clke.mongodb.net/PollingApp?retryWrites=true
+
+JWT_EXPIRES_IN=10d
+JWT_SECRET=CONNECTHEARPOLLINGAPP3SDKN4452KENLSDNFLK4394MNSKDJNFS33RS4
+JWT_COOKIE_EXPIRES_IN=10
+
+TINYPNG_API_KEY=3QqX4sKpMbqCGD4lR8VsNcJ0msLsXHc0
+TINYPNG_API_URL=https://api.tinify.com/shrink
 ```
 
 ## Contributing
